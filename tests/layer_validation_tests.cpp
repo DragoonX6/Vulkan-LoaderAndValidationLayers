@@ -407,6 +407,7 @@ class VkLayerTest : public VkRenderFramework {
         this->app_info.pEngineName = "unittest";
         this->app_info.engineVersion = 1;
         this->app_info.apiVersion = VK_API_VERSION_1_0;
+        instance_extension_names.push_back("VK_KHR_get_physical_device_properties2");
 
         m_errorMonitor = new ErrorMonitor;
         InitFramework(instance_layer_names, instance_extension_names, device_extension_names, myDbgFunc, m_errorMonitor);
@@ -22389,6 +22390,39 @@ TEST_F(VkPositiveLayerTest, PSOPolygonModeValid) {
     vkDestroyPipelineLayout(test_device.device(), pipeline_layout, NULL);
 }
 
+TEST_F(VkWsiEnabledLayerTest, GetPhysicalDeviceFamilyProperties2)
+{
+    // create surface
+    VkXcbSurfaceCreateInfoKHR surface_create_info = {VK_STRUCTURE_TYPE_XCB_SURFACE_CREATE_INFO_KHR};
+    VkSurfaceKHR surface;
+    vkCreateXcbSurfaceKHR(instance(), &surface_create_info, NULL, &surface);
+    
+    // old way of getting queue properties
+    //uint32_t queue_family_property_count;
+    //vkGetPhysicalDeviceQueueFamilyProperties(gpu(), &queue_family_property_count, NULL);
+    //VkQueueFamilyProperties queue_family_properties[queue_family_property_count];
+    //vkGetPhysicalDeviceQueueFamilyProperties(gpu(), &queue_family_property_count, queue_family_properties);
+
+
+    // device properties 2 KHR
+    auto vkGetPhysicalDeviceQueueFamilyProperties2KHR =
+        reinterpret_cast<PFN_vkGetPhysicalDeviceQueueFamilyProperties2KHR>(
+            vkGetInstanceProcAddr(instance(), "vkGetPhysicalDeviceQueueFamilyProperties2KHR"));
+    uint32_t queue_family_property_count;
+    vkGetPhysicalDeviceQueueFamilyProperties2KHR(gpu(), &queue_family_property_count, NULL);
+    VkQueueFamilyProperties2KHR queue_family_properties[queue_family_property_count];
+    for (auto& qfp : queue_family_properties) {
+        qfp.sType = VK_STRUCTURE_TYPE_QUEUE_FAMILY_PROPERTIES_2_KHR;
+    }
+    vkGetPhysicalDeviceQueueFamilyProperties2KHR(gpu(), &queue_family_property_count, queue_family_properties);
+    
+    VkBool32 supported = VK_FALSE;
+    vkGetPhysicalDeviceSurfaceSupportKHR(gpu(), 0, surface, &supported);
+    
+    vkDestroySurfaceKHR(instance(), surface, NULL);
+    m_errorMonitor->VerifyNotFound();
+}
+
 #if 0  // A few devices have issues with this test so disabling for now
 TEST_F(VkPositiveLayerTest, LongFenceChain)
 {
@@ -22457,6 +22491,7 @@ std::vector<std::string> get_args(android_app &app, const char *intent_extra_dat
     }
 
     env.DeleteLocalRef(get_string_extra_args.l);
+    qfp.sType = 
     env.DeleteLocalRef(intent);
     vm.DetachCurrentThread();
 
