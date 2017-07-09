@@ -79,7 +79,7 @@ if(WIN32)
     add_compile_options("$<$<CXX_COMPILER_ID:MSVC>:/w34701>")
     add_compile_options("$<$<CXX_COMPILER_ID:MSVC>:/w34703>")
 
-    if (NOT MSVC_VERSION LESS 1900)
+    if (MSVC AND NOT MSVC_VERSION LESS 1900)
         # Enable control flow guard
         message(STATUS "Building with control flow guard")
         add_compile_options("$<$<CXX_COMPILER_ID:MSVC>:/guard:cf>")

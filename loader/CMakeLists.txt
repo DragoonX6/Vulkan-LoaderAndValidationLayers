@@ -116,7 +116,7 @@ else()
         set(OPT_LOADER_SRCS ${OPT_LOADER_SRCS} unknown_ext_chain_gas.asm)
         add_executable(asm_offset asm_offset.c)
         add_dependencies(asm_offset generate_helper_files loader_gen_files)
-        add_custom_command(OUTPUT gen_defines.asm DEPENDS asm_offset COMMAND asm_offset GAS)
+        add_custom_command(OUTPUT gen_defines.asm DEPENDS asm_offset COMMAND asm_offset GAS VERBATIM)
         add_custom_target(loader_asm_gen_files DEPENDS gen_defines.asm)
     else()
         message(WARNING "Could not find working x86 GAS assembler\n${ASM_FAILURE_MSG}")
@@ -134,18 +134,20 @@ add_custom_target(loader_gen_files DEPENDS
 
 if (WIN32)
     # Use static MSVCRT libraries
-    foreach(configuration in CMAKE_C_FLAGS_DEBUG CMAKE_C_FLAGS_MINSIZEREL CMAKE_C_FLAGS_RELEASE CMAKE_C_FLAGS_RELWITHDEBINFO
-                             CMAKE_CXX_FLAGS_DEBUG CMAKE_CXX_FLAGS_MINSIZEREL CMAKE_CXX_FLAGS_RELEASE CMAKE_CXX_FLAGS_RELWITHDEBINFO)
-        if(${configuration} MATCHES "/MD")
-            string(REGEX REPLACE "/MD" "/MT" ${configuration} "${${configuration}}")
-        endif()
-    endforeach()
+    if(MSVC)
+        foreach(configuration in CMAKE_C_FLAGS_DEBUG CMAKE_C_FLAGS_MINSIZEREL CMAKE_C_FLAGS_RELEASE CMAKE_C_FLAGS_RELWITHDEBINFO
+                                 CMAKE_CXX_FLAGS_DEBUG CMAKE_CXX_FLAGS_MINSIZEREL CMAKE_CXX_FLAGS_RELEASE CMAKE_CXX_FLAGS_RELWITHDEBINFO)
+            if(${configuration} MATCHES "/MD")
+                string(REGEX REPLACE "/MD" "/MT" ${configuration} "${${configuration}}")
+            endif()
+        endforeach()
+    endif()
 
     if(MINGW)
         set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c11")
         if(CMAKE_C_COMPILER_ID MATCHES "Clang")
-            set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-unknown-attributes -Wno-format -Wno-unknown-attributes")
-            set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unknown-pragmas -Wno-format")
+            set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-unknown-attributes -Wno-unknown-attributes")
+            set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unknown-pragmas")
         endif()
     endif()
 
@@ -154,7 +156,7 @@ if (WIN32)
     # Build other C files with normal options
     # setup two Cmake targets (loader-norm and loader-opt) for the different compilation flags
     separate_arguments(LOCAL_C_FLAGS_DBG WINDOWS_COMMAND ${CMAKE_C_FLAGS_DEBUG})
-    set(CMAKE_C_FLAGS_DEBUG " ")
+    #set(CMAKE_C_FLAGS_DEBUG " ")
     separate_arguments(LOCAL_C_FLAGS_REL WINDOWS_COMMAND ${CMAKE_C_FLAGS_RELEASE})
 
     add_library(loader-norm OBJECT ${NORMAL_LOADER_SRCS} dirent_on_windows.c)
