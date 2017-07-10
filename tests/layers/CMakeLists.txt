@@ -104,7 +104,7 @@ if (MSVC)
     add_custom_command(TARGET VkLayer_device_profile_api POST_BUILD
         COMMAND xcopy /Y /I ${SRC_LAYER} ${DST_LAYER}
         COMMAND xcopy /Y /I ${SRC_JSON} ${DST_LAYER})
-else(WIN32 AND NOT MSVC)
+elseif(WIN32 AND NOT MSVC)
     # For Windows, copy necessary gtest DLLs to the right spot for the vk_layer_tests...
     FILE(TO_NATIVE_PATH ${CMAKE_CURRENT_BINARY_DIR}/*device_profile_api.* SRC_LAYER)
     FILE(TO_NATIVE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/windows/VkLayer_device_profile_api.json SRC_JSON)
