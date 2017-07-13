@@ -130,18 +130,20 @@ add_dependencies(vk_layer_validation_tests
    VkLayer_parameter_validation
 )
 
-if (WIN32 AND MSVC)
-    # For Windows, copy necessary gtest DLLs to the right spot for the vk_layer_tests...
-    FILE(TO_NATIVE_PATH ${CMAKE_CURRENT_BINARY_DIR}/gtest-1.7.0/$<CONFIGURATION>/*.dll SRC_GTEST_DLLS)
-    FILE(TO_NATIVE_PATH ${CMAKE_CURRENT_BINARY_DIR}/$<CONFIGURATION> DST_GTEST_DLLS)
-    add_custom_command(TARGET vk_layer_validation_tests POST_BUILD
-        COMMAND xcopy /Y /I ${SRC_GTEST_DLLS} ${DST_GTEST_DLLS})
-elseif(WIN32 AND NOT MSVC)
-    # For Windows, copy necessary gtest DLLs to the right spot for the vk_layer_tests...
-    FILE(TO_NATIVE_PATH ${CMAKE_CURRENT_BINARY_DIR}/gtest-1.7.0/*.dll SRC_GTEST_DLLS)
-    FILE(TO_NATIVE_PATH ${CMAKE_CURRENT_BINARY_DIR}/ DST_GTEST_DLLS)
-    add_custom_command(TARGET vk_layer_validation_tests POST_BUILD
-        COMMAND xcopy /Y /I ${SRC_GTEST_DLLS} ${DST_GTEST_DLLS})
+if (WIN32)
+    if (CMAKE_GENERATOR MATCHES "^Visual Studio.*")
+        # For Windows, copy necessary gtest DLLs to the right spot for the vk_layer_tests...
+        FILE(TO_NATIVE_PATH ${CMAKE_CURRENT_BINARY_DIR}/gtest-1.7.0/$<CONFIGURATION>/*.dll SRC_GTEST_DLLS)
+        FILE(TO_NATIVE_PATH ${CMAKE_CURRENT_BINARY_DIR}/$<CONFIGURATION> DST_GTEST_DLLS)
+        add_custom_command(TARGET vk_layer_validation_tests POST_BUILD
+            COMMAND xcopy /Y /I ${SRC_GTEST_DLLS} ${DST_GTEST_DLLS})
+    else()
+        # For Windows, copy necessary gtest DLLs to the right spot for the vk_layer_tests...
+        FILE(TO_NATIVE_PATH ${CMAKE_CURRENT_BINARY_DIR}/gtest-1.7.0/*.dll SRC_GTEST_DLLS)
+        FILE(TO_NATIVE_PATH ${CMAKE_CURRENT_BINARY_DIR}/ DST_GTEST_DLLS)
+        add_custom_command(TARGET vk_layer_validation_tests POST_BUILD
+            COMMAND xcopy /Y /I ${SRC_GTEST_DLLS} ${DST_GTEST_DLLS})
+    endif()
 endif()
 
 add_executable(vk_loader_validation_tests loader_validation_tests.cpp ${COMMON_CPP})
