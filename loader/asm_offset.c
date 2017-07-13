@@ -23,10 +23,10 @@
 #include <stdio.h>
 #include "loader.h"
 
-#if (!defined(_MSC_VER) || (_MSC_VER >= 1900)) && !defined(__MINGW64__)
-#define SIZE_T_FMT "%-8zu"
-#elif defined(__MINGW64__)
+#if defined(__MINGW64__)
 #define SIZE_T_FMT "%-8llu"
+#elif !defined(_MSC_VER) || (_MSC_VER >= 1900)
+#define SIZE_T_FMT "%-8zu"
 #else
 #define SIZE_T_FMT "%-8lu"
 #endif
