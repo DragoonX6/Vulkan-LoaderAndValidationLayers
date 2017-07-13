@@ -47,10 +47,12 @@ if(WIN32)
     # If MSVC, disable some signed/unsigned mismatch warnings.
     if (MSVC)
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd4267")
+        # Workaround a bug in MSVC 2017
+        # _strdup is used which fires a warning which is meant to fire when strdup is used.
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D_CRT_NONSTDC_NO_WARNINGS")
     elseif(MINGW)
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unknown-pragmas")
     endif()
-
 else()
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 endif()
