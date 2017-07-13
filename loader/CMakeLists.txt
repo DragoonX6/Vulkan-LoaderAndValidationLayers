@@ -144,7 +144,6 @@ if (WIN32)
     endif()
 
     if(MINGW)
-        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c11")
         if(CMAKE_C_COMPILER_ID MATCHES "Clang")
             set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-unknown-attributes -Wno-unknown-attributes")
             set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unknown-pragmas")
